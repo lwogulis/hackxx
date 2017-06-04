@@ -42,58 +42,59 @@ def drawMatches(img1, kp1, img2, kp2, matches):
 def getOutline(img):
 	newImg = np.ndarray(np.shape(img))
 	for r in range(np.shape(img)[0]):
-		c = -1
-		while(c < np.shape(img)[1] - 1):
-			c = c + 1
+		c = 0
+		while(c < np.shape(img)[1]):
 			if(img[r][c] > 0):
 				newImg[r][c] = 255
 				break
-	return newImg
-'''	for r in range(np.shape(img)[0]):
+			c += 1
+	for r in range(np.shape(img)[0]):
 		c = np.shape(img)[1] - 1
-		while(img[r][c] == 0):
-			c -= 1
-			if c < 0 :
+		while(c >= 0):
+			if(img[r][c] > 0):
+				newImg[r][c] = 255
 				break
-		if c < 0 :
-			continue
-		newImg[r][c] = 255 '''
+			c -= 1
+	for c in range(np.shape(img)[1]):
+		r = 0
+		while(r < np.shape(img)[0]):
+			if(img[r][c] > 0):
+				newImg[r][c] = 255
+				break
+			r += 1
+	for c in range(np.shape(img)[1]):
+		r = np.shape(img)[0] - 1
+		while(r >= 0):
+			if(img[r][c] > 0):
+				newImg[r][c] = 255
+				break
+			r -= 1
+	return newImg
 
 img1 = cv2.imread('milkBlue.png',cv2.IMREAD_GRAYSCALE)
-'''th1, im_th1 = cv2.threshold(img1, 220, 255, cv2.THRESH_BINARY_INV);
-im_floodfill1 = im_th1.copy()
-h1, w1 = im_th1.shape[:2]
-mask1 = np.zeros((h1+2, w1+2), np.uint8)
-cv2.floodFill(im_floodfill1, mask1, (0,0), 255);
-im_floodfill_inv1 = cv2.bitwise_not(im_floodfill1)'''
 edges1 = cv2.Canny(img1, 100, 200)
-img2 = cv2.imread('milkRed.png', cv2.IMREAD_GRAYSCALE)
-'''th2, im_th2 = cv2.threshold(img2, 220, 255, cv2.THRESH_BINARY_INV);
-im_floodfill2 = im_th2.copy()
-h2, w2 = im_th2.shape[:2]
-mask2 = np.zeros((h2+2, w2+2), np.uint8)
-cv2.floodFill(im_floodfill2, mask2, (0,0), 255);
-im_floodfill_inv2 = cv2.bitwise_not(im_floodfill2)'''
-edges2 = cv2.Canny(img2, 100, 200)
-print np.shape(edges2)[0]
-print np.shape(edges2)[1]
-print edges2
-cv2.imshow('orig', edges2)
+out1 = getOutline(edges1)
+cv2.imshow('outline', out1)
 cv2.waitKey(0)
-cv2.destroyWindow('orig')
-cv2.imshow('outline',getOutline(edges2))
+cv2.destroyWindow('outline')
+
+img2 = cv2.imread('milkRed.png', cv2.IMREAD_GRAYSCALE)
+edges2 = cv2.Canny(img2, 100, 200)
+out2 = getOutline(edges2)
+cv2.imshow('outline', out2)
 cv2.waitKey(0)
 cv2.destroyWindow('outline')
 orb = cv2.ORB()
 
-kp1, des1 = orb.detectAndCompute(edges1, None)
-kp2, des2 = orb.detectAndCompute(edges2, None)
+kp1, des1 = orb.detectAndCompute(img1, None)
+kp2, des2 = orb.detectAndCompute(img2, None)
+
+print 'Past detect/compute'
 
 bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 matches = bf.match(des1, des2)
 matches = sorted(matches, key = lambda x:x.distance)
 
-drawMatches(edges1, kp1, edges2, kp2, matches[:100])
-
+drawMatches(out1, kp1, out2, kp2, matches[:10])
 #plt.imshow(img3)
 #plt.show()
