@@ -71,30 +71,60 @@ def getOutline(img):
 			r -= 1
 	return newImg
 
+def getFilled(img):
+	newImg = np.ndarray(np.shape(img))
+	for r in range(np.shape(img)[0]):
+		c = 0
+		while(c < np.shape(img)[1]):
+			if(img[r][c] > 0):
+				c += 1
+				while(img[r][c] == 0):
+					newImg[r][c] = 255
+					c += 1
+				break
+			c += 1
+	for r in range(np.shape(img)[0]):
+		c = np.shape(img)[1] - 1
+		while(c >= 0):
+			if(img[r][c] > 0):
+				c -= 1
+				while(img[r][c] == 0):
+					newImg[r][c] = 255
+					c -= 1
+				break
+			c -= 1
+	return newImg
+
+
 img1 = cv2.imread('milkBlue.png',cv2.IMREAD_GRAYSCALE)
 edges1 = cv2.Canny(img1, 100, 200)
 out1 = getOutline(edges1)
+fill1 = getFilled(out1)
 cv2.imshow('outline', out1)
 cv2.waitKey(0)
 cv2.destroyWindow('outline')
+cv2.imshow('filled', fill1)
+cv2.waitKey(0)
+cv2.destroyWindow('filled')
+
 
 img2 = cv2.imread('milkRed.png', cv2.IMREAD_GRAYSCALE)
 edges2 = cv2.Canny(img2, 100, 200)
 out2 = getOutline(edges2)
+fill2 = getFilled(out2)
 cv2.imshow('outline', out2)
 cv2.waitKey(0)
 cv2.destroyWindow('outline')
+cv2.imshow('filled', fill2)
+cv2.waitKey(0)
+cv2.destroyWindow('filled')
 orb = cv2.ORB()
 
 kp1, des1 = orb.detectAndCompute(img1, None)
 kp2, des2 = orb.detectAndCompute(img2, None)
-
-print 'Past detect/compute'
 
 bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 matches = bf.match(des1, des2)
 matches = sorted(matches, key = lambda x:x.distance)
 
 drawMatches(out1, kp1, out2, kp2, matches[:10])
-#plt.imshow(img3)
-#plt.show()
